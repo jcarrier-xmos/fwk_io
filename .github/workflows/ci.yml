@@ -25,8 +25,9 @@ on:
   workflow_dispatch:
     inputs:
       run_driver_tests:
-        description: 'Force Driver Testing? (yes/no)'
-        default: 'no'
+        description: 'Force Driver Testing?'
+        type: boolean
+        default: false
 
 env:
   FWK_IO_TESTER_IMAGE: 'ghcr.io/xmos/fwk_io_tester:develop'
@@ -38,18 +39,18 @@ jobs:
     name: Change detection
     # Set job outputs to values from filter step
     outputs:
-      i2c: ${{ github.event.inputs.run_driver_tests == 'yes' || steps.filter.outputs.i2c }}
-      i2s: ${{ github.event.inputs.run_driver_tests == 'yes' || steps.filter.outputs.i2s }}
-      spi: ${{ github.event.inputs.run_driver_tests == 'yes' || steps.filter.outputs.spi }}
-      uart: ${{ github.event.inputs.run_driver_tests == 'yes' || steps.filter.outputs.uart }}
+      i2c: ${{ github.event.inputs.run_driver_tests || steps.filter.outputs.i2c }}
+      i2s: ${{ github.event.inputs.run_driver_tests || steps.filter.outputs.i2s }}
+      spi: ${{ github.event.inputs.run_driver_tests || steps.filter.outputs.spi }}
+      uart: ${{ github.event.inputs.run_driver_tests || steps.filter.outputs.uart }}
     steps:
       - name: Checkout
-        if: ${{ github.event.inputs.run_driver_tests != 'yes' }}
+        if: ${{ github.event.inputs.run_driver_tests == false }}
         uses: actions/checkout@v2
         with:
           submodules: recursive
       - name: Paths filter
-        if: ${{ github.event.inputs.run_driver_tests != 'yes' }}
+        if: ${{ github.event.inputs.run_driver_tests == false }}
         uses: dorny/paths-filter@v2
         id: filter
         with:
