@@ -7,6 +7,7 @@ parallel=1
 FRAMEWORK_IO_ROOT=`git rev-parse --show-toplevel`
 
 source ${FRAMEWORK_IO_ROOT}/tools/ci/helper_functions.sh
+export_ci_build_vars
 
 # setup configurations
 if [ -z "$1" ] || [ "$1" == "all" ]
@@ -255,11 +256,11 @@ do_build () {
 
    (cd ${path}; rm -rf build_ci_${application}_${board})
    (cd ${path}; mkdir -p  build_ci_${application}_${board})
-   if [ "$parallel" == "0" ]
+   if [ "$parallel" == "0" ] #TODO: Isn't this logic backwards?
    then
-        (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DFWK_IO_TESTS=ON; log_errors make ${application} -j)
+        (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -G "$CI_CMAKE_GENERATOR" -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DFWK_IO_TESTS=ON; log_errors $CI_BUILD_TOOL ${application} $CI_BUILD_TOOL_ARGS)
    else
-        (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DFWK_IO_TESTS=ON; log_errors make ${application})
+        (cd ${path}/build_ci_${application}_${board}; log_errors cmake ../ -G "$CI_CMAKE_GENERATOR" -DCMAKE_TOOLCHAIN_FILE=${toolchain_file} -DBOARD=${board} -DFWK_IO_TESTS=ON; log_errors $CI_BUILD_TOOL ${application})
    fi
    (cd ${path}; rm -rf build_ci_${application}_${board})
 }
